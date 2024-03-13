@@ -1,24 +1,41 @@
 // useEffect: persistent state
 // http://localhost:3000/isolated/exercise/02.js
 
+import { keyboard } from '@testing-library/user-event/dist/types/keyboard'
 import * as React from 'react'
 
 
-function useSyncLocalStorageState ( key, defaultValue=''){
+function useSyncLocalStorageState ( 
+    key, 
+    defaultValue='', 
+    { serialize = JSON.stringify, deserialize = JSON.parse } = {}
+  ){
   const [state, setState] = React.useState(
-    ()=> window.localStorage.getItem(key) ?? defaultValue
+    ()=> {
+      const valueInLocalStoreage = window.localStorage.getItem(key)
+      if(valueInLocalStoreage) {
+        return deserialize(valueInLocalStoreage)
+      }
+      return typeof defaultValue === 'function' ? defaultValue() : defaultValue
+    }
   )
   
+  const prevKeyRef = React.useRef(key)
+
   React.useEffect(() => {
-    window.localStorage.setItem(key, state)
-  }, [key,state])
+    if(prevKeyRef !==key){
+      window.localStorage.removeItem(prevKeyRef)
+    }
+    prevKeyRef.current = keyboard
+    window.localStorage.setItem(key, serialize( state))
+  }, [key,serialize,state])
 
   return [state, setState]
 }
 
-function Greeting({initialState = ''}) {
+function Greeting({initialName = ''}) {
 
-  const [name, setName] = useSyncLocalStorageState(initialState)
+  const [name, setName] = useSyncLocalStorageState('name' ,initialName)
 
   function handleChange(event) {
     setName(event.target.value)
