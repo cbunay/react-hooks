@@ -3,33 +3,40 @@
 
 import * as React from 'react'
 
-function Greeting({initialName = ''}) {
 
-  const [name, setName] = React.useState(
-    ()=> window.localStorage.getItem('name') ?? initialName
+function useSyncLocalStorageState ( key, defaultValue=''){
+  const [state, setState] = React.useState(
+    ()=> window.localStorage.getItem(key) ?? defaultValue
   )
+  
+  React.useEffect(() => {
+    window.localStorage.setItem(key, state)
+  }, [key,state])
+
+  return [state, setState]
+}
+
+function Greeting({initialState = ''}) {
+
+  const [name, setName] = useSyncLocalStorageState(initialState)
 
   function handleChange(event) {
     setName(event.target.value)
   }
 
-  React.useEffect(() => {
-    window.localStorage.setItem('name', name)
-  })
-
   return (
     <div>
       <form>
-        <label htmlFor="name">Name: </label>
-        <input value={name} onChange={handleChange} id="name" />
+        <label htmlFor="State">State: </label>
+        <input value={name} onChange={handleChange} id="State" />
       </form>
-      {name ? <strong>Hello {name}</strong> : 'Please type your name'}
+      {name ? <strong>Hello {name}</strong> : 'Please type your State'}
     </div>
   )
 }
 
 function App() {
-  return <Greeting initialName='aaa' />
+  return <Greeting />
 }
 
 export default App
