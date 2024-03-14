@@ -1,7 +1,6 @@
 // useEffect: persistent state
 // http://localhost:3000/isolated/exercise/02.js
 
-import { keyboard } from '@testing-library/user-event/dist/types/keyboard'
 import * as React from 'react'
 
 
@@ -26,7 +25,7 @@ function useSyncLocalStorageState (
     if(prevKeyRef !==key){
       window.localStorage.removeItem(prevKeyRef)
     }
-    prevKeyRef.current = keyboard
+    prevKeyRef.current = key
     window.localStorage.setItem(key, serialize( state))
   }, [key,serialize,state])
 
